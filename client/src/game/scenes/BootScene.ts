@@ -13,6 +13,13 @@ export class BootScene extends Phaser.Scene {
 
   preload() {
     const boot = this.registry.get('boot') as Bootstrap;
+    // Build single-file / preview: mapa embutido em window.__OFFICE_MAP__
+    // (evita fetch quando não há servidor de assets). Caso contrário, carrega o .tmj.
+    const embedded = (window as unknown as { __OFFICE_MAP__?: unknown }).__OFFICE_MAP__;
+    if (embedded) {
+      this.cache.json.add('office-map', embedded);
+      return;
+    }
     this.load.json('office-map', boot.map.tmjUrl);
   }
 
