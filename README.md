@@ -61,6 +61,22 @@ npm run dev
 | `npm run typecheck` | typecheck de shared + server + client |
 | `npm run build` | build de produção |
 
+## Preview online (GitHub Pages)
+
+O workflow `.github/workflows/deploy-pages.yml` builda o client e publica no
+GitHub Pages a cada push desta branch. **Ative o Pages uma vez** (o token do CI
+não tem permissão para criar o site sozinho):
+
+> Settings → Pages → **Source: GitHub Actions** → salvar.
+
+Depois disso, rode o workflow (Actions → "Deploy preview (GitHub Pages)" →
+Run workflow) e o site fica em:
+`https://guscaciotti-hub.github.io/escrit-riovirtual/`
+
+O preview roda em **modo offline**: mapa, movimentação, agentes nas mesas,
+proximidade e minimapa funcionam. Chat 1:1 e reuniões exigem o backend local
+com `ANTHROPIC_API_KEY` (gastam tokens de verdade).
+
 ## Controles
 
 - **WASD / setas** — andar
