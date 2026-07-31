@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react';
 import path from 'node:path';
 
 export default defineConfig({
+  // Base configurável para hospedagem em subdiretório (ex.: GitHub Pages).
+  // Local/dev continua em '/'.
+  base: process.env.VITE_BASE ?? '/',
   plugins: [react()],
   resolve: {
     alias: {

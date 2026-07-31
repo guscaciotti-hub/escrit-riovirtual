@@ -134,7 +134,8 @@ function offlineBootstrap(): Omit<Bootstrap, 'online'> {
       playerSpawn: PLAYER_SPAWN,
       desks: DESKS,
       meetingSeats: MEETING_SEATS,
-      tmjUrl: '/assets/maps/office.tmj',
+      // respeita o base do build (GitHub Pages serve em subdiretório)
+      tmjUrl: `${import.meta.env.BASE_URL}assets/maps/office.tmj`,
     },
     features: { llmEnabled: false },
   };
