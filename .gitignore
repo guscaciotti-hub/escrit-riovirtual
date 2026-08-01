@@ -22,3 +22,6 @@ server/data/
 
 # Vite
 client/.vite/
+
+# preview single-file gerado por build:standalone
+client/preview-standalone.html

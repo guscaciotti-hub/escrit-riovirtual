@@ -13,6 +13,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  build: {
+    rollupOptions: {
+      // VITE_SINGLE_FILE=1 junta tudo num bundle só (preview single-file,
+      // onde chunks carregados sob demanda não teriam de onde ser buscados).
+      output: process.env.VITE_SINGLE_FILE ? { inlineDynamicImports: true } : {},
+    },
+  },
   server: {
     port: 5173,
     host: true,

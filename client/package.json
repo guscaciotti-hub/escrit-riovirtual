@@ -10,7 +10,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "genmap": "node scripts/genMap.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:standalone": "VITE_SINGLE_FILE=1 VITE_BASE=/ VITE_SERVER_URL= vite build && node scripts/buildStandalone.mjs"
   },
   "dependencies": {
     "@evoluze/shared": "*",
