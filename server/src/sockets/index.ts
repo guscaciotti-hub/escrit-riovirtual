@@ -13,6 +13,7 @@ import { createMeeting, getAgent, getMeeting } from '../db/repo.js';
 import { estimateMeeting } from '../services/tokenBudget.js';
 import { hasApiKey } from '../services/anthropic.js';
 import { MeetingOrchestrator } from '../agents/MeetingOrchestrator.js';
+import * as activity from '../services/activity.js';
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents>;
 type IOSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
@@ -50,6 +51,8 @@ export function registerSockets(io: IO) {
         moving: false,
       };
       presence.set(socket.id, entity);
+      // Rastreio de atividade só começa se houver consentimento vigente.
+      activity.startSession(org.id, user.id, 'office');
       socket.emit('presence:sync', Array.from(presence.values()));
       socket.to(orgRoom(org.id)).emit('presence:update', entity);
     });
@@ -61,6 +64,7 @@ export function registerSockets(io: IO) {
       entity.y = payload.y;
       entity.facing = payload.facing;
       entity.moving = payload.moving;
+      activity.trackPosition(org.id, user.id, payload.x, payload.y);
       socket.to(orgRoom(org.id)).emit('presence:update', entity);
     });
 
@@ -142,6 +146,7 @@ export function registerSockets(io: IO) {
 
     socket.on('disconnect', () => {
       presence.delete(socket.id);
+      activity.endSession(user.id);
       socket.to(orgRoom(org.id)).emit('presence:leave', user.id);
     });
   });

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<style>
+  :root { color-scheme: dark; }
+  body {
+    width: 320px; margin: 0; padding: 14px;
+    font: 13px/1.45 Inter, system-ui, sans-serif;
+    background: #0b1220; color: #e5edff;
+  }
+  h1 { font-size: 14px; margin: 0 0 2px; color: #00d4c6; }
+  .sub { font-size: 11px; color: #7c8aa5; margin-bottom: 12px; }
+  .card { border: 1px solid #1e2b45; background: #111a2b; border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+  label { display: block; font-size: 11px; color: #9aa5b8; margin-bottom: 4px; }
+  input {
+    width: 100%; box-sizing: border-box; background: #0b1220; color: #e5edff;
+    border: 1px solid #1e2b45; border-radius: 7px; padding: 7px 9px; font-size: 12px;
+  }
+  input:focus { outline: none; border-color: #00d4c6; }
+  button {
+    width: 100%; border: 0; border-radius: 7px; padding: 8px; font-weight: 600;
+    font-size: 12px; cursor: pointer; background: #00d4c6; color: #0b1220; margin-top: 8px;
+  }
+  button.ghost { background: transparent; color: #9aa5b8; border: 1px solid #1e2b45; }
+  button.warn { background: transparent; color: #ff8080; border: 1px solid #4a2230; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 3px 0; }
+  .bar { height: 6px; border-radius: 4px; background: #1a2337; overflow: hidden; margin-top: 3px; }
+  .bar > i { display: block; height: 100%; }
+  .pill { font-size: 10px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+  .on { background: rgba(49,209,88,.15); color: #4ade80; }
+  .off { background: rgba(255,180,0,.15); color: #fbbf24; }
+  .note { font-size: 10px; color: #7c8aa5; }
+  .privacy { font-size: 10px; color: #7c8aa5; border-top: 1px solid #1e2b45; padding-top: 8px; margin-top: 4px; }
+  .err { font-size: 10px; color: #ff8080; margin-top: 6px; }
+  .num { font-variant-numeric: tabular-nums; color: #c7d3e8; }
+</style>
+</head>
+<body>
+  <h1>Evoluze — Atividade</h1>
+  <div class="sub">Tempo por categoria. Sem URL, sem captura de tela.</div>
+
+  <div id="setup" class="card" hidden>
+    <label for="server">Endereço do servidor</label>
+    <input id="server" value="http://localhost:3001" />
+    <label for="token" style="margin-top:8px">Código de pareamento</label>
+    <input id="token" placeholder="evx_..." />
+    <button id="pair">Conectar</button>
+  </div>
+
+  <div id="main" hidden>
+    <div class="card">
+      <div class="row">
+        <strong>Registro</strong>
+        <span id="state" class="pill on">ativo</span>
+      </div>
+      <button id="toggle" class="ghost">Pausar registro</button>
+    </div>
+
+    <div class="card">
+      <div class="row"><strong>Hoje</strong><span id="total" class="num"></span></div>
+      <div id="cats"></div>
+      <div id="err" class="err" hidden></div>
+    </div>
+
+    <button id="send" class="ghost">Enviar agora</button>
+    <button id="forget" class="warn">Desconectar e apagar local</button>
+  </div>
+
+  <div class="privacy">
+    A classificação acontece neste computador. O servidor recebe apenas a
+    categoria e a duração — nunca o endereço das páginas.
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

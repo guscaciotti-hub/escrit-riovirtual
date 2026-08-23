@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Evoluze — Registro de Atividade",
+  "version": "1.0.0",
+  "description": "Registra tempo por CATEGORIA de site. O endereço das páginas nunca sai do seu computador.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "idle",
+    "alarms"
+  ],
+  "host_permissions": [
+    "http://localhost:3001/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Evoluze — Atividade"
+  }
+}

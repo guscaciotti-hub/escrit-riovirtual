@@ -11,6 +11,8 @@ import { MinutesViewer } from './components/MinutesViewer';
 import { PresenceList } from './components/PresenceList';
 import { Minimap } from './components/Minimap';
 import { AgentForm } from './components/AgentForm';
+import { ConsentModal } from './components/ConsentModal';
+import { ProductivityPanel } from './components/ProductivityPanel';
 
 export default function App() {
   const boot = useStore((s) => s.boot);
@@ -57,6 +59,8 @@ export default function App() {
       <TranscriptPanel />
       <MinutesViewer />
       <AgentForm />
+      <ProductivityPanel />
+      <ConsentModal />
     </div>
   );
 }

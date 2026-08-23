@@ -171,3 +171,64 @@ export const sendChat = (agentId: string, message: string, history: Array<{ role
   });
 
 export type { MeetingMinutes };
+
+// ============================================================
+// Atividade / produtividade
+// ============================================================
+
+import type {
+  ActivityConsent,
+  ActivityScope,
+  ActivitySummary,
+  CategoryMeta,
+} from '@evoluze/shared';
+
+export interface ActivityPolicy {
+  version: string;
+  retentionDays: number;
+  categories: CategoryMeta[];
+  collected: string[];
+  notCollected: string[];
+  rights: string[];
+  visibility: string;
+}
+
+export interface PersonRow {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  consents: ActivityConsent[];
+}
+
+export const getPolicy = () => req<ActivityPolicy>('/api/activity/policy');
+export const getConsents = () => req<ActivityConsent[]>('/api/activity/consent');
+export const acceptConsent = (scope: ActivityScope) =>
+  req<ActivityConsent[]>('/api/activity/consent', {
+    method: 'POST',
+    body: JSON.stringify({ scope }),
+  });
+export const revokeConsent = (scope: ActivityScope) =>
+  req<ActivityConsent[]>(`/api/activity/consent/${scope}`, { method: 'DELETE' });
+
+export const getPause = () => req<{ paused: boolean }>('/api/activity/pause');
+export const setPause = (paused: boolean) =>
+  req<{ paused: boolean }>('/api/activity/pause', {
+    method: 'POST',
+    body: JSON.stringify({ paused }),
+  });
+
+export const getSummary = (from: string, to: string, userId?: string) =>
+  req<ActivitySummary>(
+    `/api/activity/summary?from=${from}&to=${to}${userId ? `&userId=${userId}` : ''}`,
+  );
+export const getPeople = () => req<PersonRow[]>('/api/activity/people');
+
+export const createExtensionToken = (label: string) =>
+  req<{ token: string; serverUrl: string }>('/api/activity/extension/token', {
+    method: 'POST',
+    body: JSON.stringify({ label }),
+  });
+
+export const myDataExportUrl = () => `${SERVER_URL}/api/activity/me/export`;
+export const deleteMyData = () => req<void>('/api/activity/me', { method: 'DELETE' });

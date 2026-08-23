@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { useStore } from '../store/useStore';
+import { getPause, setPause } from '../lib/api';
 
 export function HUD() {
   const boot = useStore((s) => s.boot)!;
@@ -9,6 +11,24 @@ export function HUD() {
   const meetingPhase = useStore((s) => s.meetingPhase);
   const setMeetingModalOpen = useStore((s) => s.setMeetingModalOpen);
   const setAgentFormOpen = useStore((s) => s.setAgentFormOpen);
+  const setProductivityOpen = useStore((s) => s.setProductivityOpen);
+  const trackingPaused = useStore((s) => s.trackingPaused);
+  const setTrackingPaused = useStore((s) => s.setTrackingPaused);
+
+  useEffect(() => {
+    if (!boot.online) return;
+    getPause().then((r) => setTrackingPaused(r.paused)).catch(() => undefined);
+  }, [boot.online, setTrackingPaused]);
+
+  const togglePause = async () => {
+    const next = !trackingPaused;
+    setTrackingPaused(next);
+    try {
+      await setPause(next);
+    } catch {
+      setTrackingPaused(!next);
+    }
+  };
 
   const llm = boot.features.llmEnabled;
   const online = boot.online;
@@ -26,6 +46,29 @@ export function HUD() {
         </div>
 
         <div className="pointer-events-auto flex items-center gap-2">
+          {/* Pausa do registro de atividade — sempre visível, nunca escondida. */}
+          {online && (
+            <button
+              onClick={togglePause}
+              className={`rounded-lg border px-3 py-2 text-xs font-medium backdrop-blur transition ${
+                trackingPaused
+                  ? 'border-amber-500/40 bg-amber-500/10 text-amber-300'
+                  : 'border-evoluze-border bg-evoluze-panel/90 text-slate-300 hover:border-evoluze-teal/50'
+              }`}
+              title={trackingPaused ? 'Retomar registro de atividade' : 'Pausar registro de atividade'}
+            >
+              {trackingPaused ? '⏸ registro pausado' : '● registrando'}
+            </button>
+          )}
+          {online && boot.user.role === 'master' && (
+            <button
+              onClick={() => setProductivityOpen(true)}
+              className="rounded-lg border border-evoluze-border bg-evoluze-panel/90 px-3 py-2 text-xs font-medium text-slate-200 backdrop-blur transition hover:border-evoluze-teal/50"
+              title="Painel de produtividade (somente gestor)"
+            >
+              📊 Produtividade
+            </button>
+          )}
           <button
             onClick={() => setAgentFormOpen(true)}
             disabled={!online}

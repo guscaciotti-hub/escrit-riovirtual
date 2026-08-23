@@ -295,3 +295,5 @@ export const DEFAULT_MODELS = {
   debate: 'claude-haiku-4-5' as AgentModel,
   reasoning: 'claude-sonnet-4-6' as AgentModel,
 };
+
+export * from './activity.js';

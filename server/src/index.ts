@@ -9,6 +9,8 @@ import { orgRouter } from './routes/org.js';
 import { agentsRouter } from './routes/agents.js';
 import { meetingsRouter } from './routes/meetings.js';
 import { chatRouter } from './routes/chat.js';
+import { activityRouter, extensionIngestRouter } from './routes/activity.js';
+import { purgeExpiredEvents } from './services/activity.js';
 import { registerSockets } from './sockets/index.js';
 import { hasApiKey } from './services/anthropic.js';
 
@@ -23,18 +25,29 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true, llmEnabled: hasApiKey() });
 });
 
+// Ingestão da extensão: autenticada por token próprio, fora da sessão do app.
+app.use('/api/extension', extensionIngestRouter);
+
 // Todas as rotas de negócio passam pela auth abstraída (Fase 4).
 app.use('/api', authMiddleware);
 app.use('/api', orgRouter);
 app.use('/api/agents', agentsRouter);
 app.use('/api/meetings', meetingsRouter);
 app.use('/api/chat', chatRouter);
+app.use('/api/activity', activityRouter);
 
 const server = http.createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
   cors: { origin: CLIENT_ORIGIN, credentials: true },
 });
 registerSockets(io);
+
+// Retenção LGPD: limpa eventos brutos vencidos na subida e a cada 6h.
+purgeExpiredEvents();
+setInterval(() => {
+  const removed = purgeExpiredEvents();
+  if (removed > 0) console.log(`[retencao] ${removed} eventos brutos expirados removidos`);
+}, 6 * 60 * 60 * 1000).unref();
 
 server.listen(PORT, () => {
   console.log(`[server] http://localhost:${PORT}  (client: ${CLIENT_ORIGIN})`);
