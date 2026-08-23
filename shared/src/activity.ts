@@ -98,6 +98,53 @@ export const DOMAIN_CATEGORIES: Record<string, WebCategory> = {
   'x.com': 'entretenimento',
   'twitter.com': 'entretenimento',
   'reddit.com': 'entretenimento',
+
+  // --- Mídia paga (o núcleo da operação) ---
+  'business.meta.com': 'ads',
+  'ads.linkedin.com': 'ads',
+  'ads.microsoft.com': 'ads',
+  'ads.pinterest.com': 'ads',
+  'merchants.google.com': 'ads',
+  'ads.reddit.com': 'ads',
+
+  // --- Mensuração ---
+  'app.hyros.com': 'analytics',
+  'mixpanel.com': 'analytics',
+  'hotjar.com': 'analytics',
+  'clarity.microsoft.com': 'analytics',
+
+  // --- CRM / comercial ---
+  'rdstation.com.br': 'gestao',
+  'crm.rdstation.com': 'gestao',
+  'kommo.com': 'gestao',
+  'pipedrive.com': 'gestao',
+  'hubspot.com': 'gestao',
+  'calendly.com': 'gestao',
+
+  // --- Sites de cliente / infra ---
+  'wordpress.com': 'dev',
+  'wp-admin': 'dev',
+  'elementor.com': 'design',
+  'hostinger.com.br': 'dev',
+  'hostgator.com.br': 'dev',
+  'cloudflare.com': 'dev',
+  'zapier.com': 'dev',
+  'make.com': 'dev',
+
+  // --- Criação ---
+  'capcut.com': 'design',
+  'adobe.com': 'design',
+  'freepik.com': 'design',
+  'unsplash.com': 'design',
+
+  // --- IA / pesquisa ---
+  'gemini.google.com': 'pesquisa',
+  'perplexity.ai': 'pesquisa',
+
+  // --- Comunicação ---
+  'outlook.office.com': 'comunicacao',
+  'teams.microsoft.com': 'comunicacao',
+  'discord.com': 'comunicacao',
 };
 
 /** Resolve um hostname para categoria. Roda no cliente, nunca no servidor. */

@@ -36,6 +36,20 @@ async function render() {
           })
           .join('');
 
+  // Lista local de domínios sem categoria (nunca sai daqui)
+  const unk = Object.entries(s.unknown ?? {}).sort((a, b) => b[1] - a[1]);
+  $('unkCard').hidden = unk.length === 0;
+  $('unkCount').textContent = `${unk.length} site${unk.length === 1 ? '' : 's'}`;
+  $('unk').innerHTML = unk
+    .slice(0, 12)
+    .map(
+      ([host, sec]) =>
+        `<div class="row"><span style="font-size:11px;color:#c7d3e8">${host}</span>` +
+        `<span class="num" style="font-size:11px">${fmt(sec)}</span></div>`,
+    )
+    .join('');
+  window.__unk = unk;
+
   $('err').hidden = !s.lastError;
   $('err').textContent = s.lastError ? `Falha ao enviar: ${s.lastError}` : '';
 }
@@ -56,6 +70,18 @@ $('toggle').addEventListener('click', async () => {
 
 $('send').addEventListener('click', async () => {
   await send({ type: 'flush' });
+  render();
+});
+
+$('copy').addEventListener('click', async () => {
+  const list = (window.__unk ?? []).map(([h, s]) => `${h}  ${Math.round(s / 60)}min`).join('\n');
+  await navigator.clipboard.writeText(list);
+  $('copy').textContent = 'Copiado!';
+  setTimeout(() => ($('copy').textContent = 'Copiar lista'), 1500);
+});
+
+$('clearUnk').addEventListener('click', async () => {
+  await send({ type: 'clearUnknown' });
   render();
 });
 

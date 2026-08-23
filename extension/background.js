@@ -18,6 +18,7 @@ const DEFAULT_STATE = {
   lastTickAt: null,
   acc: { date: today(), cats: {}, idle: 0 },
   catMap: null, // { domains, categories }
+  unknown: {}, // { dominio: segundos } — LOCAL, nunca enviado
 };
 
 function today() {
@@ -38,26 +39,29 @@ async function setState(patch) {
 
 /** Resolve hostname -> categoria usando o mapa em cache. Roda só aqui. */
 function categorize(hostname, catMap) {
-  if (!catMap) return 'outros';
   const host = String(hostname).toLowerCase().replace(/^www\./, '');
-  const domains = catMap.domains ?? {};
-  if (domains[host]) return domains[host];
+  const domains = catMap?.domains ?? {};
+  if (domains[host]) return { category: domains[host], host, known: true };
   const parts = host.split('.');
   for (let i = 1; i < parts.length - 1; i++) {
     const parent = parts.slice(i).join('.');
-    if (domains[parent]) return domains[parent];
+    if (domains[parent]) return { category: domains[parent], host, known: true };
   }
-  return 'outros';
+  return { category: 'outros', host, known: false };
 }
 
-/** Qual a categoria da aba ativa agora? A URL morre dentro desta função. */
+/**
+ * Qual a categoria da aba ativa agora? A URL morre dentro desta função.
+ * Retorna { category, host, known } — `host` é usado APENAS para a lista local
+ * de não classificados (ver `unknown` no storage) e nunca é transmitido.
+ */
 async function currentCategory(state) {
   try {
     const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
     if (!tab || !tab.url) return null;
     const url = new URL(tab.url);
     if (!/^https?:$/.test(url.protocol)) return null;
-    return categorize(url.hostname, state.catMap); // <- só a categoria sobrevive
+    return categorize(url.hostname, state.catMap);
   } catch {
     return null;
   }
@@ -78,12 +82,20 @@ async function tick(reason) {
     if (seconds > 0 && seconds < 3600) {
       const idle = await chrome.idle.queryState(IDLE_AFTER_SECONDS);
       const acc = { ...state.acc, cats: { ...state.acc.cats } };
+      const unknown = { ...(state.unknown ?? {}) };
       if (idle !== 'active') {
         acc.idle += seconds;
       } else if (state.currentCategory) {
-        acc.cats[state.currentCategory] = (acc.cats[state.currentCategory] ?? 0) + seconds;
+        const cat = state.currentCategory.category;
+        acc.cats[cat] = (acc.cats[cat] ?? 0) + seconds;
+        // Lista de ajuda para calibrar o mapa de categorias.
+        // FICA SÓ NESTE NAVEGADOR — nunca entra em nenhum payload enviado.
+        if (!state.currentCategory.known && state.currentCategory.host) {
+          const h = state.currentCategory.host;
+          unknown[h] = (unknown[h] ?? 0) + seconds;
+        }
       }
-      await setState({ acc });
+      await setState({ acc, unknown });
     }
   }
 
@@ -168,6 +180,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         paused: s.paused,
         acc: s.acc,
         categories: s.catMap?.categories ?? [],
+        unknown: s.unknown ?? {},
         lastError: s.lastError ?? null,
       });
     } else if (msg.type === 'pair') {
@@ -187,6 +200,9 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     } else if (msg.type === 'flush') {
       await tick('manual');
       await flush();
+      sendResponse({ ok: true });
+    } else if (msg.type === 'clearUnknown') {
+      await setState({ unknown: {} });
       sendResponse({ ok: true });
     } else if (msg.type === 'forget') {
       await chrome.storage.local.clear();
