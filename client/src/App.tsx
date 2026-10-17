@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ApiError, fetchBootstrap, getToken, setToken } from './lib/api';
+import { ApiError, fetchBootstrap, setToken } from './lib/api';
 import { useStore } from './store/useStore';
 import { useRealtime } from './hooks/useRealtime';
 import { GameCanvas } from './components/GameCanvas';
@@ -39,10 +39,9 @@ export default function App() {
   }, [setBoot]);
 
   useEffect(() => {
-    if (!getToken()) {
-      setPhase('login');
-      return;
-    }
+    // Sempre tenta carregar: se o servidor responder 401 vai para o login;
+    // se não houver servidor algum, o bootstrap cai em modo demonstração
+    // (mapa explorável, sem login e sem dados reais).
     load();
   }, [load]);
 

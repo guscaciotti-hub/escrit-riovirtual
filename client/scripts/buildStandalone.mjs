@@ -13,6 +13,13 @@ const css = readFileSync(`${DIST}/assets/${cssName}`, 'utf8');
 const tmj = readFileSync(`${DIST}/assets/maps/office.tmj`, 'utf8');
 const rawJs = readFileSync(`${DIST}/assets/${jsName}`, 'utf8');
 
+// Arte em base64: no arquivo único não há PNG para o Phaser buscar.
+const dataUrl = (p) => 'data:image/png;base64,' + readFileSync(p).toString('base64');
+const art = {
+  tiles: dataUrl(`${DIST}/assets/tilesets/office.png`),
+  people: dataUrl(`${DIST}/assets/characters/people.png`),
+};
+
 // Bulletproof: o bundle vira base64 (só [A-Za-z0-9+/=]), impossível conter
 // qualquer sequência que feche o <script>. Decodifica e executa como módulo.
 const b64 = Buffer.from(rawJs, 'utf8').toString('base64');
@@ -27,7 +34,8 @@ const html = `<!doctype html>
 </head>
 <body>
 <div id="root"></div>
-<script>window.__OFFICE_MAP__ = ${tmj};</script>
+<script>window.__OFFICE_MAP__ = ${tmj};
+window.__OFFICE_ART__ = ${JSON.stringify(art)};</script>
 <script>
 (function () {
   var b64 = "${b64}";

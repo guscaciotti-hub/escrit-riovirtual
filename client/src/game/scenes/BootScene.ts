@@ -15,17 +15,17 @@ export class BootScene extends Phaser.Scene {
     const boot = this.registry.get('boot') as Bootstrap;
     const base = import.meta.env.BASE_URL;
 
+    // No build single-file a arte vem embutida em base64 (não há arquivo para buscar).
+    const art = (window as unknown as { __OFFICE_ART__?: { tiles: string; people: string } })
+      .__OFFICE_ART__;
+    const tilesUrl = art?.tiles ?? `${base}assets/tilesets/office.png`;
+    const peopleUrl = art?.people ?? `${base}assets/characters/people.png`;
+
     // 'tiles' alimenta o tilemap; 'tiles-frames' permite desenhar um tile
     // avulso como sprite (usado no furniture_top, que precisa de y-sorting).
-    this.load.image('tiles', `${base}assets/tilesets/office.png`);
-    this.load.spritesheet('tiles-frames', `${base}assets/tilesets/office.png`, {
-      frameWidth: 32,
-      frameHeight: 32,
-    });
-    this.load.spritesheet('people', `${base}assets/characters/people.png`, {
-      frameWidth: 24,
-      frameHeight: 32,
-    });
+    this.load.image('tiles', tilesUrl);
+    this.load.spritesheet('tiles-frames', tilesUrl, { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('people', peopleUrl, { frameWidth: 24, frameHeight: 32 });
 
     // Build single-file: mapa embutido para dispensar o fetch.
     const embedded = (window as unknown as { __OFFICE_MAP__?: unknown }).__OFFICE_MAP__;
