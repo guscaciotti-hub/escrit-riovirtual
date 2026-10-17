@@ -1,25 +1,22 @@
 import Phaser from 'phaser';
-import type { Agent, MeetingMessage, SeatAssignment } from '@evoluze/shared';
+import type { Dir } from '../game/entities/GridCharacter';
 
-/**
- * Ponte de eventos entre a cena Phaser e a UI React.
- * React → Phaser: comandos (sentar agentes, mostrar balão, voltar às mesas).
- * Phaser → React: sinais (proximidade, interagir, todos sentados).
- */
+/** Ponte de eventos entre a cena Phaser e a UI React. */
 export interface GameBusEvents {
   // Phaser -> React
-  'proximity:change': (agentId: string | null) => void;
-  'player:interact': (agentId: string) => void;
-  'meeting:allSeated': (meetingId: string) => void;
-  'player:move': (payload: { x: number; y: number; facing: string; moving: boolean }) => void;
+  'player:move': (p: { tileX: number; tileY: number; facing: Dir }) => void;
 
   // React -> Phaser
-  'meeting:seat': (payload: { meetingId: string; seats: SeatAssignment[] }) => void;
-  'meeting:bubble': (msg: MeetingMessage) => void;
-  'meeting:thinking': (agentId: string) => void;
-  'meeting:return': () => void;
+  'remote:update': (p: {
+    id: string;
+    name: string;
+    look: number;
+    tileX: number;
+    tileY: number;
+    facing: Dir;
+  }) => void;
+  'remote:leave': (id: string) => void;
   'input:lock': (locked: boolean) => void;
-  'agent:add': (agent: Agent) => void;
 }
 
 class TypedBus extends Phaser.Events.EventEmitter {

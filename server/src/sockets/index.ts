@@ -2,6 +2,7 @@ import type { Server, Socket } from 'socket.io';
 import {
   MEETING_ROOM_ID,
   MEETING_SEATS,
+  TILE_SIZE,
   type ClientToServerEvents,
   type CreateMeetingInput,
   type EntityState,
@@ -14,6 +15,7 @@ import { estimateMeeting } from '../services/tokenBudget.js';
 import { hasApiKey } from '../services/anthropic.js';
 import { MeetingOrchestrator } from '../agents/MeetingOrchestrator.js';
 import * as activity from '../services/activity.js';
+import { savePosition } from '../services/auth.js';
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents>;
 type IOSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
@@ -45,10 +47,10 @@ export function registerSockets(io: IO) {
         id: user.id,
         kind: 'user',
         name: user.name,
-        x: 0,
-        y: 0,
+        look: user.look,
+        tileX: user.tileX,
+        tileY: user.tileY,
         facing: 'down',
-        moving: false,
       };
       presence.set(socket.id, entity);
       // Rastreio de atividade só começa se houver consentimento vigente.
@@ -60,11 +62,11 @@ export function registerSockets(io: IO) {
     socket.on('presence:move', (payload) => {
       const entity = presence.get(socket.id);
       if (!entity) return;
-      entity.x = payload.x;
-      entity.y = payload.y;
+      entity.tileX = payload.tileX;
+      entity.tileY = payload.tileY;
       entity.facing = payload.facing;
-      entity.moving = payload.moving;
-      activity.trackPosition(org.id, user.id, payload.x, payload.y);
+      savePosition(user.id, payload.tileX, payload.tileY);
+      activity.trackPosition(org.id, user.id, payload.tileX * TILE_SIZE, payload.tileY * TILE_SIZE);
       socket.to(orgRoom(org.id)).emit('presence:update', entity);
     });
 

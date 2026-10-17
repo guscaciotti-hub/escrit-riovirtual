@@ -4,13 +4,8 @@ import { useStore } from './store/useStore';
 import { useRealtime } from './hooks/useRealtime';
 import { GameCanvas } from './components/GameCanvas';
 import { HUD } from './components/HUD';
-import { ChatPanel } from './components/ChatPanel';
-import { MeetingModal } from './components/MeetingModal';
-import { TranscriptPanel } from './components/TranscriptPanel';
-import { MinutesViewer } from './components/MinutesViewer';
 import { PresenceList } from './components/PresenceList';
 import { Minimap } from './components/Minimap';
-import { AgentForm } from './components/AgentForm';
 import { ConsentModal } from './components/ConsentModal';
 import { ProductivityPanel } from './components/ProductivityPanel';
 
@@ -54,11 +49,6 @@ export default function App() {
       <HUD />
       <PresenceList />
       <Minimap />
-      <ChatPanel />
-      <MeetingModal />
-      <TranscriptPanel />
-      <MinutesViewer />
-      <AgentForm />
       <ProductivityPanel />
       <ConsentModal />
     </div>

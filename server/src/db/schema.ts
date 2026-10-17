@@ -30,6 +30,15 @@ export const users = sqliteTable(
       .notNull()
       .default('member'),
     avatarConfig: text('avatar_config').notNull().default('{}'),
+    /** scrypt: "salt:hash" — nunca a senha em claro */
+    passwordHash: text('password_hash').notNull().default(''),
+    /** índice do visual no spritesheet (0..5) */
+    look: integer('look').notNull().default(0),
+    /** última posição conhecida, em tiles */
+    tileX: integer('tile_x').notNull().default(27),
+    tileY: integer('tile_y').notNull().default(17),
+    isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+    lastLoginAt: text('last_login_at'),
     createdAt: text('created_at').notNull().default(now),
   },
   (t) => ({

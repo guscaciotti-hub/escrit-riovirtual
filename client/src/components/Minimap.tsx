@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MAP_HEIGHT_TILES, MAP_WIDTH_TILES, ROOMS, TILE_SIZE } from '@evoluze/shared';
+import { MAP_HEIGHT_TILES, MAP_WIDTH_TILES, ROOMS } from '@evoluze/shared';
 import { useStore } from '../store/useStore';
 import { gameBus } from '../lib/gameBus';
 
@@ -14,10 +14,11 @@ const ROOM_COLORS: Record<string, string> = {
 /** Minimapa no canto (estilo Gather). */
 export function Minimap() {
   const boot = useStore((s) => s.boot)!;
+  const presence = useStore((s) => s.presence);
   const [player, setPlayer] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    const onMove = (p: { x: number; y: number }) => setPlayer({ x: p.x, y: p.y });
+    const onMove = (p: { tileX: number; tileY: number }) => setPlayer({ x: p.tileX, y: p.tileY });
     gameBus.onT('player:move', onMove);
     return () => {
       gameBus.offT('player:move', onMove);
@@ -26,7 +27,7 @@ export function Minimap() {
 
   const w = MAP_WIDTH_TILES * SCALE;
   const h = MAP_HEIGHT_TILES * SCALE;
-  const toMap = (px: number) => (px / TILE_SIZE) * SCALE;
+  const toMap = (tile: number) => tile * SCALE;
 
   return (
     <div className="pointer-events-none absolute bottom-3 right-3 z-20 rounded-lg border border-evoluze-border bg-evoluze-dark/80 p-1.5 backdrop-blur">
@@ -44,15 +45,11 @@ export function Minimap() {
             strokeWidth={0.5}
           />
         ))}
-        {boot.agents.map((a) => (
-          <circle
-            key={a.id}
-            cx={toMap(a.spawnX)}
-            cy={toMap(a.spawnY)}
-            r={2}
-            fill={a.avatarConfig.tint ?? '#64748b'}
-          />
-        ))}
+        {presence
+          .filter((p) => p.id !== boot.user.id)
+          .map((p) => (
+            <circle key={p.id} cx={toMap(p.tileX)} cy={toMap(p.tileY)} r={2} fill="#E0A53C" />
+          ))}
         <circle cx={toMap(player.x)} cy={toMap(player.y)} r={2.5} fill="#00D4C6" stroke="#fff" strokeWidth={0.6} />
       </svg>
     </div>

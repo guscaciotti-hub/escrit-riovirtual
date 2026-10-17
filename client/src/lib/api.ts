@@ -79,6 +79,9 @@ function offlineBootstrap(): Omit<Bootstrap, 'online'> {
     email: 'gustavopaidtraffic@gmail.com',
     role: 'master',
     avatarConfig: { sprite: 'ceo', tint: '#00D4C6' },
+    look: 0,
+    tileX: PLAYER_SPAWN.x,
+    tileY: PLAYER_SPAWN.y,
     createdAt: iso,
   };
   const stub = (

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import type { Bootstrap } from '../../lib/api';
 
-/** Carrega o mapa Tiled (.tmj) e passa o bootstrap adiante para a OfficeScene. */
+/** Carrega a arte (tileset + personagens) e o mapa Tiled. */
 export class BootScene extends Phaser.Scene {
   constructor() {
     super('BootScene');
@@ -13,18 +13,21 @@ export class BootScene extends Phaser.Scene {
 
   preload() {
     const boot = this.registry.get('boot') as Bootstrap;
-    // Build single-file / preview: mapa embutido em window.__OFFICE_MAP__
-    // (evita fetch quando não há servidor de assets). Caso contrário, carrega o .tmj.
+    const base = import.meta.env.BASE_URL;
+
+    this.load.image('tiles', `${base}assets/tilesets/office.png`);
+    this.load.spritesheet('people', `${base}assets/characters/people.png`, {
+      frameWidth: 24,
+      frameHeight: 32,
+    });
+
+    // Build single-file: mapa embutido para dispensar o fetch.
     const embedded = (window as unknown as { __OFFICE_MAP__?: unknown }).__OFFICE_MAP__;
-    if (embedded) {
-      this.cache.json.add('office-map', embedded);
-      return;
-    }
-    this.load.json('office-map', boot.map.tmjUrl);
+    if (embedded) this.cache.json.add('office-map', embedded);
+    else this.load.json('office-map', boot.map.tmjUrl);
   }
 
   create() {
-    const boot = this.registry.get('boot') as Bootstrap;
-    this.scene.start('OfficeScene', { boot });
+    this.scene.start('OfficeScene', { boot: this.registry.get('boot') });
   }
 }

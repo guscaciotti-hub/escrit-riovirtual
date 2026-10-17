@@ -2,6 +2,7 @@ import { ROOMS, tileToPx } from '@evoluze/shared';
 import { db, sqlite } from './index.js';
 import { agents, orgs, rooms, users } from './schema.js';
 import { EVOLUZE_CONTEXT } from '../agents/companyContext.js';
+import { hashPassword } from '../services/auth.js';
 import ricardo from '../agents/personas/ricardo.json' with { type: 'json' };
 import camila from '../agents/personas/camila.json' with { type: 'json' };
 import teo from '../agents/personas/teo.json' with { type: 'json' };
@@ -31,6 +32,10 @@ function seed() {
       email: 'gustavopaidtraffic@gmail.com',
       role: 'master',
       avatarConfig: JSON.stringify({ sprite: 'ceo', tint: '#00D4C6' }),
+      passwordHash: hashPassword(process.env.SEED_PASSWORD ?? 'evoluze123'),
+      look: 0,
+      tileX: 27,
+      tileY: 17,
     })
     .onConflictDoNothing()
     .run();
@@ -78,6 +83,7 @@ function seed() {
   }
 
   const count = sqlite.prepare('SELECT COUNT(*) as n FROM agents').get() as { n: number };
+  console.log('[seed] login: gustavopaidtraffic@gmail.com / senha: ' + (process.env.SEED_PASSWORD ?? 'evoluze123'));
   console.log(`[seed] pronto. ${count.n} agentes no banco. Org=${ORG_ID}, User=${USER_ID}.`);
 }
 

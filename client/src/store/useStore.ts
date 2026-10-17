@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type {
   Agent,
+  EntityState,
   Meeting,
   MeetingMessage,
   MeetingMinutes,
@@ -26,6 +27,12 @@ interface StoreState {
   // Conexão
   connected: boolean;
   setConnected: (v: boolean) => void;
+
+  // Presença (quem está no escritório agora)
+  presence: EntityState[];
+  setPresence: (e: EntityState[]) => void;
+  upsertPresence: (e: EntityState) => void;
+  removePresence: (id: string) => void;
 
   // Proximidade
   nearbyAgentId: string | null;
@@ -93,6 +100,16 @@ export const useStore = create<StoreState>((set, get) => ({
 
   connected: false,
   setConnected: (v) => set({ connected: v }),
+
+  presence: [],
+  setPresence: (e) => set({ presence: e }),
+  upsertPresence: (e) =>
+    set((s) => ({
+      presence: s.presence.some((p) => p.id === e.id)
+        ? s.presence.map((p) => (p.id === e.id ? e : p))
+        : [...s.presence, e],
+    })),
+  removePresence: (id) => set((s) => ({ presence: s.presence.filter((p) => p.id !== id) })),
 
   nearbyAgentId: null,
   setNearbyAgent: (id) => set({ nearbyAgentId: id }),

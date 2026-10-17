@@ -33,6 +33,10 @@ export interface User {
   email: string;
   role: UserRole;
   avatarConfig: AvatarConfig;
+  /** índice do visual no spritesheet de personagens (0..5) */
+  look: number;
+  tileX: number;
+  tileY: number;
   createdAt: string;
 }
 
@@ -230,11 +234,10 @@ export interface EntityState {
   id: string;
   kind: 'user' | 'agent';
   name: string;
-  x: number;
-  y: number;
+  look: number;
+  tileX: number;
+  tileY: number;
   facing: Facing;
-  moving: boolean;
-  status?: string; // emoji ou label de status
 }
 
 // ============================================================
@@ -269,7 +272,7 @@ export interface ServerToClientEvents {
 /** Eventos emitidos pelos clientes para o servidor. */
 export interface ClientToServerEvents {
   'presence:join': (payload: { userId: string }) => void;
-  'presence:move': (payload: { x: number; y: number; facing: Facing; moving: boolean }) => void;
+  'presence:move': (payload: { tileX: number; tileY: number; facing: Facing }) => void;
 
   'meeting:convene': (payload: CreateMeetingInput, ack: (res: { meetingId?: string; error?: string }) => void) => void;
   'meeting:ready': (payload: { meetingId: string }) => void;

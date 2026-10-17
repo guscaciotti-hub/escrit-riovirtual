@@ -42,6 +42,9 @@ export const toUser = (r: UserRow): User => ({
   email: r.email,
   role: r.role,
   avatarConfig: json(r.avatarConfig, { sprite: 'default' }),
+  look: r.look,
+  tileX: r.tileX,
+  tileY: r.tileY,
   createdAt: r.createdAt,
 });
 
