@@ -16,10 +16,13 @@
     "db:seed": "npm run db:seed -w server",
     "db:reset": "npm run db:reset -w server",
     "setup": "npm install && npm run db:migrate && npm run db:seed",
-    "typecheck": "npm run typecheck -w shared && npm run typecheck -w server && npm run typecheck -w client"
+    "typecheck": "npm run typecheck -w shared && npm run typecheck -w server && npm run typecheck -w client",
+    "art": "node tools/pixelart/gen.mjs",
+    "art:import": "node tools/pixelart/import.mjs"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "concurrently": "^9.1.0",
+    "pngjs": "^7.0.0"
   },
   "engines": {
     "node": ">=20"

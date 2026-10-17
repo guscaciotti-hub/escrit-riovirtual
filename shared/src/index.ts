@@ -256,6 +256,7 @@ export interface ServerToClientEvents {
   'presence:sync': (entities: EntityState[]) => void;
   'presence:update': (entity: EntityState) => void;
   'presence:leave': (id: string) => void;
+  'auth:error': (message: string) => void;
 
   /** Reunião convocada: agentes devem caminhar até seus assentos. */
   'meeting:convened': (payload: { meeting: Meeting; seats: SeatAssignment[] }) => void;

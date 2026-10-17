@@ -72,7 +72,11 @@ const walls = empty();
 const furniture = empty();
 const furnitureTop = empty();
 
-// Piso por sala
+// Piso base em todo o mapa: sem isso, qualquer tile fora de uma sala
+// vira buraco preto na tela.
+for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) floor[idx(x, y)] = FLOOR;
+
+// Piso por sala (sobrepõe o base)
 for (const r of ROOMS) {
   const g = r.type === 'lounge' ? FLOOR_LOUNGE : r.type === 'private' ? FLOOR_CEO : r.type === 'meeting' ? FLOOR_MEETING : FLOOR;
   for (let y = r.bounds.y; y < r.bounds.y + r.bounds.h; y++) {

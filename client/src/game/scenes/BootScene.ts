@@ -15,7 +15,13 @@ export class BootScene extends Phaser.Scene {
     const boot = this.registry.get('boot') as Bootstrap;
     const base = import.meta.env.BASE_URL;
 
+    // 'tiles' alimenta o tilemap; 'tiles-frames' permite desenhar um tile
+    // avulso como sprite (usado no furniture_top, que precisa de y-sorting).
     this.load.image('tiles', `${base}assets/tilesets/office.png`);
+    this.load.spritesheet('tiles-frames', `${base}assets/tilesets/office.png`, {
+      frameWidth: 32,
+      frameHeight: 32,
+    });
     this.load.spritesheet('people', `${base}assets/characters/people.png`, {
       frameWidth: 24,
       frameHeight: 32,

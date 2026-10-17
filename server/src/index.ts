@@ -4,12 +4,13 @@ import express from 'express';
 import cors from 'cors';
 import { Server } from 'socket.io';
 import type { ClientToServerEvents, ServerToClientEvents } from '@evoluze/shared';
-import { authMiddleware } from './middleware/auth.js';
+import { authMiddleware, optionalAuth } from './middleware/auth.js';
 import { orgRouter } from './routes/org.js';
 import { agentsRouter } from './routes/agents.js';
 import { meetingsRouter } from './routes/meetings.js';
 import { chatRouter } from './routes/chat.js';
 import { activityRouter, extensionIngestRouter } from './routes/activity.js';
+import { authRouter } from './routes/auth.js';
 import { purgeExpiredEvents } from './services/activity.js';
 import { registerSockets } from './sockets/index.js';
 import { hasApiKey } from './services/anthropic.js';
@@ -28,7 +29,10 @@ app.get('/api/health', (_req, res) => {
 // Ingestão da extensão: autenticada por token próprio, fora da sessão do app.
 app.use('/api/extension', extensionIngestRouter);
 
-// Todas as rotas de negócio passam pela auth abstraída (Fase 4).
+// Login e gestão de equipe: resolvem a sessão por conta própria.
+app.use('/api/auth', optionalAuth, authRouter);
+
+// Todas as demais rotas de negócio exigem sessão válida.
 app.use('/api', authMiddleware);
 app.use('/api', orgRouter);
 app.use('/api/agents', agentsRouter);

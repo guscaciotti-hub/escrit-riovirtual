@@ -1,15 +1,10 @@
 import type { NextFunction, Request, Response } from 'express';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/index.js';
-import { orgs, users } from '../db/schema.js';
+import { orgs } from '../db/schema.js';
 import { toOrg, toUser } from '../db/mappers.js';
+import { getUserById, verifyToken } from '../services/auth.js';
 import type { Org, User } from '@evoluze/shared';
-
-/**
- * Auth abstraída (Fase 4). No MVP single-user retorna o usuário master do seed.
- * Para plugar JWT/Clerk depois: trocar a implementação de `resolveUser` — as
- * rotas continuam usando `getCurrentUser(req)` sem alteração.
- */
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -20,32 +15,36 @@ declare global {
   }
 }
 
-const DEFAULT_ORG_SLUG = process.env.DEFAULT_ORG_SLUG ?? 'evoluze';
-
-let cached: { user: User; org: Org } | null = null;
-
-function resolveUser(_req: Request): { user: User; org: Org } | null {
-  if (cached) return cached;
-  const orgRow = db.select().from(orgs).where(eq(orgs.slug, DEFAULT_ORG_SLUG)).get();
+/** Resolve a sessão a partir do token. Retorna null se não houver sessão válida. */
+export function resolveAuth(token: string): { user: User; org: Org } | null {
+  const userId = verifyToken(token);
+  if (!userId) return null;
+  const row = getUserById(userId);
+  if (!row) return null;
+  const orgRow = db.select().from(orgs).where(eq(orgs.id, row.orgId)).get();
   if (!orgRow) return null;
-  const userRow = db
-    .select()
-    .from(users)
-    .where(eq(users.orgId, orgRow.id))
-    .get();
-  if (!userRow) return null;
-  cached = { user: toUser(userRow), org: toOrg(orgRow) };
-  return cached;
+  return { user: toUser(row), org: toOrg(orgRow) };
 }
 
-/** Middleware: injeta req.auth. Todas as rotas de negócio dependem dele. */
+function bearerOf(req: Request): string {
+  const h = req.header('authorization') ?? '';
+  return h.startsWith('Bearer ') ? h.slice(7) : '';
+}
+
+/** Exige sessão válida. Todas as rotas de negócio passam por aqui. */
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  const auth = resolveUser(req);
+  const auth = resolveAuth(bearerOf(req));
   if (!auth) {
-    res.status(401).json({ error: 'Nenhum usuário/org resolvido. Rode db:seed.' });
+    res.status(401).json({ error: 'Faça login para continuar.' });
     return;
   }
   req.auth = auth;
+  next();
+}
+
+/** Deixa passar sem sessão (usado nas rotas de login). */
+export function optionalAuth(req: Request, _res: Response, next: NextFunction) {
+  req.auth = resolveAuth(bearerOf(req)) ?? undefined;
   next();
 }
 
@@ -57,9 +56,4 @@ export function getCurrentUser(req: Request): User {
 export function getCurrentOrg(req: Request): Org {
   if (!req.auth) throw new Error('getCurrentOrg chamado sem authMiddleware');
   return req.auth.org;
-}
-
-/** Usado pelos handlers de socket (sem req Express). */
-export function resolveDefaultAuth(): { user: User; org: Org } | null {
-  return resolveUser({} as Request);
 }

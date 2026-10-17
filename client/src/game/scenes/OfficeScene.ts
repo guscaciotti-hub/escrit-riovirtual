@@ -93,7 +93,7 @@ export class OfficeScene extends Phaser.Scene {
           const gid = top[y * W + x];
           if (!gid) continue;
           this.add
-            .image(x * TILE + TILE / 2, y * TILE + TILE, 'tiles', gid - 1)
+            .image(x * TILE + TILE / 2, y * TILE + TILE, 'tiles-frames', gid - 1)
             .setOrigin(0.5, 1)
             .setDepth((y + 1) * TILE);
         }

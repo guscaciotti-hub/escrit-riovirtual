@@ -16,6 +16,15 @@ import {
 
 export const SERVER_URL = import.meta.env.VITE_SERVER_URL ?? 'http://localhost:3001';
 
+// ---- sessão ----
+const TOKEN_KEY = 'evoluze.token';
+export const getToken = () => {
+  try { return localStorage.getItem(TOKEN_KEY); } catch { return null; }
+};
+export const setToken = (t: string | null) => {
+  try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch { /* modo privado */ }
+};
+
 export interface MapConfig {
   tileSize: number;
   widthTiles: number;
@@ -43,17 +52,47 @@ interface Org {
   createdAt: string;
 }
 
+export class ApiError extends Error {
+  constructor(message: string, public status: number) {
+    super(message);
+  }
+}
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = getToken();
   const res = await fetch(`${SERVER_URL}${path}`, {
     ...init,
-    headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(init?.headers ?? {}),
+    },
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.error ? JSON.stringify(body.error) : `HTTP ${res.status}`);
+    const msg = typeof body.error === 'string' ? body.error : `Erro ${res.status}`;
+    throw new ApiError(msg, res.status);
   }
-  return res.json() as Promise<T>;
+  return res.status === 204 ? (undefined as T) : ((await res.json()) as T);
 }
+
+// ---- autenticação ----
+export const login = (email: string, password: string) =>
+  req<{ token: string; user: User }>('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+export const fetchMe = () => req<User>('/api/auth/me');
+export const listTeam = () => req<User[]>('/api/auth/team');
+export const createTeamMember = (input: {
+  name: string;
+  email: string;
+  password: string;
+  role?: 'master' | 'member';
+  look?: number;
+}) => req<User>('/api/auth/team', { method: 'POST', body: JSON.stringify(input) });
+export const setMemberActive = (id: string, isActive: boolean) =>
+  req<User>(`/api/auth/team/${id}`, { method: 'PATCH', body: JSON.stringify({ isActive }) });
 
 /**
  * Bootstrap do app. Tenta o backend; se offline, cai para um fallback local
@@ -64,7 +103,9 @@ export async function fetchBootstrap(): Promise<Bootstrap> {
   try {
     const data = await req<Omit<Bootstrap, 'online'>>('/api/bootstrap');
     return { ...data, online: true };
-  } catch {
+  } catch (err) {
+    // 401 precisa levar à tela de login; só queda de servidor vira preview offline.
+    if (err instanceof ApiError && err.status === 401) throw err;
     return { ...offlineBootstrap(), online: false };
   }
 }

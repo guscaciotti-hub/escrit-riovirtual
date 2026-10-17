@@ -84,6 +84,10 @@ interface StoreState {
   transcriptOpen: boolean;
   setTranscriptOpen: (v: boolean) => void;
 
+  // Equipe
+  teamOpen: boolean;
+  setTeamOpen: (v: boolean) => void;
+
   // Produtividade
   productivityOpen: boolean;
   setProductivityOpen: (v: boolean) => void;
@@ -184,6 +188,9 @@ export const useStore = create<StoreState>((set, get) => ({
   setMinutesOpen: (v) => set({ minutesOpen: v }),
   transcriptOpen: false,
   setTranscriptOpen: (v) => set({ transcriptOpen: v }),
+
+  teamOpen: false,
+  setTeamOpen: (v) => set({ teamOpen: v }),
 
   productivityOpen: false,
   setProductivityOpen: (v) => set({ productivityOpen: v }),

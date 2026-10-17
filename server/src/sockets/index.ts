@@ -9,7 +9,7 @@ import {
   type SeatAssignment,
   type ServerToClientEvents,
 } from '@evoluze/shared';
-import { resolveDefaultAuth } from '../middleware/auth.js';
+import { resolveAuth } from '../middleware/auth.js';
 import { createMeeting, getAgent, getMeeting } from '../db/repo.js';
 import { estimateMeeting } from '../services/tokenBudget.js';
 import { hasApiKey } from '../services/anthropic.js';
@@ -31,8 +31,11 @@ function orgRoom(orgId: string) {
 
 export function registerSockets(io: IO) {
   io.on('connection', (socket: IOSocket) => {
-    const auth = resolveDefaultAuth();
+    // Socket autenticado pelo mesmo token da API, enviado no handshake.
+    const token = (socket.handshake.auth?.token as string | undefined) ?? '';
+    const auth = resolveAuth(token);
     if (!auth) {
+      socket.emit('auth:error', 'Sessão inválida. Faça login novamente.');
       socket.disconnect();
       return;
     }

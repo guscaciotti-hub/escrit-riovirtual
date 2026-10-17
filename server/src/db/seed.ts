@@ -37,7 +37,11 @@ function seed() {
       tileX: 27,
       tileY: 17,
     })
-    .onConflictDoNothing()
+    .onConflictDoUpdate({
+      target: users.id,
+      // reaplica a senha: bancos criados antes da autenticação ficavam sem hash
+      set: { passwordHash: hashPassword(process.env.SEED_PASSWORD ?? 'evoluze123'), isActive: true },
+    })
     .run();
 
   // Salas a partir do layout canônico (bounds em tiles).
